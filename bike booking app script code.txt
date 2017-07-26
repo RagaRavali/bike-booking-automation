@@ -1,0 +1,126 @@
+var sheet = SpreadsheetApp.getActiveSheet();
+  var startRow = 2; 
+  var numRows = sheet.getLastRow()-1; 
+  var dataRange = sheet.getRange(startRow, 1, numRows, sheet.getLastColumn());
+  var data = dataRange.getValues();
+  var location = new Array("TVT" , "Gurgaon", "Oragadam");
+  var sendto = '';
+  //var STATE_MANAGER_EMAIL = "MANAGER_EMAIL";
+  //var STATE_APPROVED = "Approved";
+  //var STATE_DENIED = "Denied";
+  //var COLUMN_STATE = 0;
+
+  for(i in data){
+    var row = data[i];
+    var sdate = new Date(row[9]);
+    var edate = new Date(row[10]);
+    var bike = new String(row[8]);
+    var name = new String(row[3]);
+  }
+function onOpen() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet();
+  var entries = [{
+    name : "Send Feed Back form directly from here",
+    functionName : "sendSurvey"
+  }];
+  sheet.addMenu("Feed back", entries);
+};
+
+function sendSurvey(){
+  var url= "http://goo.gl/forms/7q5mWjgZYj" ;
+  var recipient = Browser.inputBox("Send Survey", "Enter Recipient Email", Browser.Buttons.OK_CANCEL);
+  if (recipient === 'cancel') return;
+  var message = "Hello Rider,"+ "\r \r" + "Please fill the form and give us your valuable experience."+ " \r\r"+ url+ "\r\r" + "Thank you.";  
+  var subject = "Share your experience";
+  MailApp.sendEmail(recipient, subject, message);
+}
+
+function sendFeedbackEmail(email) {
+  var url= "http://goo.gl/forms/n99cNT1yic" ;
+  const A = "Approved";
+  const D = "Denied";
+  for (i in data) {
+    var row = data[i];
+    var date = new Date();
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    var sheetDate = new Date(row[10]);
+    var Sdate = Utilities.formatDate(date,'GMT+0200','yyyy:MM:dd');
+    var SsheetDate = Utilities.formatDate(sheetDate,'GMT+0200', 'yyyy:MM:dd');
+    Logger.log(Sdate+' =? '+SsheetDate);
+    var decision = new String(row[0]);
+    if(decision == A){
+       if (Sdate == SsheetDate){
+          var emailAddress = row[2];
+          var message = "Hello Rider,"+ "\r \r" + "Please share your valuable experience with us\r"+ " \r"+ url+ "\r\r" + "Thank you.";  
+          var subject = "Share your experience";
+          MailApp.sendEmail(emailAddress, subject, message);
+      }    
+    }
+}
+  }
+  
+
+
+function approver(){
+  for(i in data){
+    var row = data[i];
+    var dec = new String(row[0]);
+    var loc= new String(row[5]);
+    var state = "";
+    if(dec == state){
+      if (loc == location[0]){
+    sendApproverEmail("ravalip@royalenfield.com");
+       }
+   
+      else if(loc == location[1] ){
+    sendApproverEmail("geetika@royalenfield.com");
+    //flaga[i] = 1;
+    }
+      else if(loc == location[2] ){
+      sendApproverEmail("sk@royalenfield.com");
+      }
+    var cell = sheet.getActiveCell().getA1Notation();
+    if(cell.indexOf('B')!=-1){ 
+      sheet.getRange('A'+ sheet.getActiveCell().getRowIndex()).setValue("Decision Pending");;
+      }
+    }}
+
+   //sheet.getRange(row.rowNumber, COLUMN_STATE).setValue(row.state);
+}
+
+function rider(email, decision){
+  var emailAddress = email;
+  var deci = decision;
+  var subject = "Bike booking decision";
+  var message = ''
+  if (deci == "Approved"){
+    message = "Hello Rider,"+ "\r \r" + "Admin approved your request from\r\r"+"Start Date:"+" "+sdate+"\r\rEnd Date:"+" "+edate+ "\r\rHappy Riding.\rThank you.";
+    MailApp.sendEmail(emailAddress, subject, message);
+  }
+  else if (deci == "Denied"){
+    message = "Hello Rider,"+ "\r \r" + "Admin denied your request. Contact admin team for further details"+"\r\r" + "Thank you.";
+    MailApp.sendEmail(emailAddress, subject, message);
+  }
+  
+}
+
+function onDecision(){
+  var decision = '';
+  var cell = sheet.getActiveCell().getA1Notation();
+     if(cell.indexOf('A')!=-1){ 
+      sendto = sheet.getRange('C'+ sheet.getActiveCell().getRowIndex()).getValue()
+      decision = sheet.getRange('A'+ sheet.getActiveCell().getRowIndex()).getValue()  
+      }  
+   rider(sendto,decision); 
+}
+
+function sendApproverEmail(email){
+  var url = "https://docs.google.com/a/royalenfield.com/spreadsheets/d/1DxIGjyrXaOOGSZIgj_nIKl2rynjHGqESHYW__xFYpUE/edit?usp=sharing" ;
+  var emailAdd = email;
+  var message = "Hello Admin," + "\r\r" + name +" "+"requested for"+" "+bike+" "+"from\r\r"+"Start Date:"+" "+sdate+"\r\rEnd Date:"+" "+edate+"\r\rPlease check here for futher details and give your approval or denial"+ "\r\r" + url + "\r\r" + "Thank you" ;
+  var subject = "Bike Request";
+  MailApp.sendEmail(emailAdd, subject, message);  
+  //prompt(Approved or Denied);
+}
